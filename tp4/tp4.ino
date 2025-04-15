@@ -24,12 +24,13 @@ DHT_Unified dht(DHTPIN, DHTTYPE);
 uint32_t delayMS;
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
-int opcion = 0;  
+int opcion = 0;
 #define pantallaajuste 0
 #define pantallamedicion 1
-#define cambio 2
-int prevBot1 = HIGH;  
-int prevBot2 = HIGH;  
+#define cambioajuste 2
+#define cambiomedicion 3
+int prevBot1 = HIGH;
+int prevBot2 = HIGH;
 sensors_event_t event;
 bool estadoanteriorajuste = false;
 void setup() {
@@ -49,7 +50,8 @@ void setup() {
 
   if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
     Serial.println(F("SSD1306 allocation failed"));
-    for (;;);
+    for (;;)
+      ;
   }
 
   delay(2000);
@@ -63,9 +65,9 @@ void setup() {
 }
 
 void loop() {
-if(event.temperature>limite){
-digitalWrite(2,HIGH);
-    }else digitalWrite(2,LOW);
+  if (event.temperature > limite) {
+    digitalWrite(2, HIGH);
+  } else digitalWrite(2, LOW);
   unsigned long tiempoahora = millis();
   if (tiempoahora - tiempo >= intervalo) {
     tiempo = tiempoahora;
@@ -81,17 +83,9 @@ digitalWrite(2,HIGH);
 
   switch (opcion) {
     case pantallaajuste:
-      if (bot1 == HIGH && prevBot1 == LOW) { 
-        limite++;
+      if (bot1 == LOW || bot2 == LOW) {
 
-      }
-      if (bot2 == HIGH && prevBot2 == LOW) {  
-        limite--;
-
-      }
-            if (bot1 == LOW && bot2 == LOW) {
-              estadoanteriorajuste = true;
-opcion = cambio;
+        opcion = cambioajuste;
       }
 
       display.clearDisplay();
@@ -111,9 +105,11 @@ opcion = cambio;
       break;
 
     case pantallamedicion:
-            if (bot1 == LOW && bot2 == LOW) {
-              estadoanteriorajuste = false;
-opcion = cambio;
+      
+      if(bot1 == HIGH ||bot2 == HIGH){
+        if(prevBot2 == LOW &&prevBot1 == LOW){
+          opcion = pantallaajuste;
+        }
       }
       display.clearDisplay();
       display.setCursor(0, 0);
@@ -124,16 +120,34 @@ opcion = cambio;
       display.print("Ambos botones: ajuste");
       display.display();
       break;
-          case cambio:
-                  if(bot1 == HIGH && bot2 == HIGH){
-                    if( estadoanteriorajuste )
-        opcion = pantallamedicion;
-        }else {
-           opcion = pantallaajuste;
-        }
-          break;
-  }
+    case cambioajuste:
 
+        if (bot1 == HIGH) {
+
+          if (prevBot1 == LOW) {
+            limite++;
+            opcion = pantallaajuste;
+          }
+        }
+        if (bot2 == HIGH) {
+          if (prevBot2 == LOW) {
+            limite--;
+            opcion = pantallaajuste;
+          }
+        }
+      
+      if(bot1 == HIGH ||bot2 == HIGH){
+        if(prevBot2 == LOW &&prevBot1 == LOW){
+          opcion = pantallamedicion;
+        }
+      }
+
+      break;
+
+    case cambiomedicion:
+
+      break;
+  }
   prevBot1 = bot1;
   prevBot2 = bot2;
 }
