@@ -28,7 +28,6 @@ int opcion = 0;
 #define pantallaajuste 0
 #define pantallamedicion 1
 #define cambioajuste 2
-#define cambiomedicion 3
 int prevBot1 = HIGH;
 int prevBot2 = HIGH;
 sensors_event_t event;
@@ -141,10 +140,6 @@ void loop() {
           opcion = pantallamedicion;
         }
       }
-
-      break;
-
-    case cambiomedicion:
 
       break;
   }
