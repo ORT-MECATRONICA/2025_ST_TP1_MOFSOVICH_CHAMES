@@ -27,7 +27,10 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 int opcion = 0;
 #define pantallaajuste 0
 #define pantallamedicion 1
-#define cambioajuste 2
+#define confirmacionmedicion 2
+#define subir 3
+#define bajar 4
+#define confirmacionajuste 5
 int prevBot1 = HIGH;
 int prevBot2 = HIGH;
 sensors_event_t event;
@@ -79,13 +82,8 @@ void loop() {
 
   int bot1 = digitalRead(pinbot1);
   int bot2 = digitalRead(pinbot2);
-
-  switch (opcion) {
-    case pantallaajuste:
-      if (bot1 == LOW || bot2 == LOW) {
-
-        opcion = cambioajuste;
-      }
+switch( opcion){
+  case pantallaajuste:
 
       display.clearDisplay();
       display.setCursor(0, 0);
@@ -93,23 +91,26 @@ void loop() {
       display.print(limite);
       display.println(" C");
       display.setCursor(0, 10);
-      display.print("Temp: ");
-      display.print(event.temperature);
-      display.println(" C");
       display.setCursor(0, 20);
       display.print("Bot1: +");
       display.setCursor(0, 30);
       display.print("Bot2: -");
       display.display();
-      break;
+      if (bot1 == LOW && bot2 == LOW) {
 
-    case pantallamedicion:
-      
-      if(bot1 == HIGH ||bot2 == HIGH){
-        if(prevBot2 == LOW &&prevBot1 == LOW){
-          opcion = pantallaajuste;
-        }
+        opcion = confirmacionajuste;
       }
+            if (bot1 == LOW ) {
+
+        opcion = subir;
+      }
+                  if ( bot2 == LOW) {
+
+        opcion = bajar;
+      }
+      break;
+  case pantallamedicion:
+  
       display.clearDisplay();
       display.setCursor(0, 0);
       display.print("Temp: ");
@@ -117,32 +118,49 @@ void loop() {
       display.println(" C");
       display.setCursor(0, 20);
       display.print("Ambos botones: ajuste");
+      display.setCursor(0, 40);
+      display.print("Limite: ");
+      display.print(limite);
+      display.println(" C");
       display.display();
-      break;
-    case cambioajuste:
+      if (bot1 == LOW && bot2 == LOW) {
 
-        if (bot1 == HIGH) {
-
-          if (prevBot1 == LOW) {
-            limite++;
-            opcion = pantallaajuste;
-          }
-        }
-        if (bot2 == HIGH) {
-          if (prevBot2 == LOW) {
-            limite--;
-            opcion = pantallaajuste;
-          }
-        }
-      
-      if(bot1 == HIGH ||bot2 == HIGH){
-        if(prevBot2 == LOW &&prevBot1 == LOW){
-          opcion = pantallamedicion;
-        }
+        opcion = confirmacionmedicion;
       }
-
       break;
-  }
+      case confirmacionmedicion:
+            if (bot1 == HIGH && bot2 == HIGH) {
+
+        opcion = pantallaajuste;
+      }
+      break;
+       case confirmacionajuste:
+            if (bot1 == HIGH && bot2 == HIGH) {
+
+        opcion = pantallamedicion;
+      }
+      break;
+ case subir:
+             if (bot1 == HIGH) {
+limite++;
+        opcion = pantallaajuste;
+      }
+         if (bot1 == LOW && bot2 == LOW) {
+
+        opcion = confirmacionajuste;
+      }   
+ break;
+  case bajar:
+             if (bot2 == HIGH) {
+limite--;
+        opcion = pantallaajuste;
+      }
+            if (bot1 == LOW && bot2 == LOW) {
+
+        opcion = confirmacionajuste;
+      }
+ break;
+}
   prevBot1 = bot1;
   prevBot2 = bot2;
 }
