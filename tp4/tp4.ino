@@ -31,8 +31,6 @@ int opcion = 0;
 #define subir 3
 #define bajar 4
 #define confirmacionajuste 5
-int prevBot1 = HIGH;
-int prevBot2 = HIGH;
 sensors_event_t event;
 bool estadoanteriorajuste = false;
 void setup() {
@@ -161,6 +159,5 @@ limite--;
       }
  break;
 }
-  prevBot1 = bot1;
-  prevBot2 = bot2;
+  
 }
